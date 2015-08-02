@@ -88,28 +88,28 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 
 		
 		$users = apply_filters( 'bbp_notify_admin_topic_notifiable_users', $users );
-	
+		
+		
 		if ( empty( $users ) ) {
 			return false;
 		}
+		//get all users emails
+		$emails = $this->get_emails( $users );
 		
-		//the default to email address is  admin_email 's	
-		$to_email = get_option( 'admin_email');
+		if( empty( $emails ) ) {
+			return false;//no one to send to
+		}
+		
+		$to_email = array_shift( $emails );
 		
 		// Loop through users
-		foreach ( (array) $users as $user ) {
-
-			// Don't send notifications to the person who created the topic
-			if ( ( ! empty( $topic_author ) && (int) $user->ID=== (int) $topic_author ) 
-					|| $to_email == $user->user_email ) {
-				
-					continue;
-			}
+		foreach ( $emails as $email ) {
 			//add all other users as bcc(only applies in case we have more than 1 admin )
-			$headers[] = 'Bcc: ' . $user->user_email;
+			$headers[] = 'Bcc: ' . $email;
 		}
 
 		//send email
+		//even if an admin posts, It will notify everyone including him
 		$this->notify( array(
 			'subject'		=> $subject,
 			'message'		=> $message,
@@ -190,30 +190,30 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 			return false;
 		}
 		
-			
-		$to_email = get_option( 'admin_email');
+		//get all users emails
+		$emails = $this->get_emails( $users );
+		
+		if( empty( $emails ) ) {
+			return false;//no one to send to
+		}
+		
+		$to_email = array_shift( $emails );
 		
 		// Loop through users
-		foreach ( (array) $users as $user ) {
-
-			// Don't send notifications to the person who made the post
-			if ( ( ! empty( $reply_author ) && (int) $user->ID=== (int) $reply_author ) 
-					|| $to_email == $user->user_email ) {
-				
-					continue;
-			}
-						
-			//add all other admins as bcc
-			$headers[] = 'Bcc: ' . $user->user_email;
+		foreach ( $emails as $email ) {
+			//add all other users as bcc(only applies in case we have more than 1 admin )
+			$headers[] = 'Bcc: ' . $email;
 		}
 
-		//send email
+		
+
 		$this->notify( array(
 			'subject'		=> $subject,
 			'message'		=> $message,
 			'to'			=> $to_email,
 			'header'		=> $headers
 		) );
+		
 	}
 	
 	/**
@@ -287,5 +287,30 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		) );
 		
 		return $users;
+	}
+	
+	private function get_emails( $users ) {
+		
+		$emails = wp_list_pluck( $users, 'user_email' );
+		//get current user's email
+		$current_user = wp_get_current_user();
+		
+		if( empty( $current_user ) ) {
+			return false;
+		}
+				
+		//the default to email address is  admin_email 's	
+		//$to_email = get_option( 'admin_email' );
+		
+		$current_user_email = $current_user->user_email;
+		
+		/*if( $to_email == $current_user_email ) {
+			$to_email = '';//we will get back to it in a moment
+		}*/
+		//when an admin is posting, we exclude him from the list too, 
+		
+		$emails = array_diff( $emails, (array) $current_user_email );
+		
+		return $emails;
 	}
 }

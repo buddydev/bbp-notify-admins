@@ -94,7 +94,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 			return false;
 		}
 		//get all users emails
-		$emails = $this->get_emails( $users );
+		$emails = $this->get_emails( $users, 'topic' );
 		
 		if( empty( $emails ) ) {
 			return false;//no one to send to
@@ -191,7 +191,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		}
 		
 		//get all users emails
-		$emails = $this->get_emails( $users );
+		$emails = $this->get_emails( $users, 'reply' );
 		
 		if( empty( $emails ) ) {
 			return false;//no one to send to
@@ -289,7 +289,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		return $users;
 	}
 	
-	private function get_emails( $users ) {
+	private function get_emails( $users, $context = null ) {
 		
 		$emails = wp_list_pluck( $users, 'user_email' );
 		//get current user's email
@@ -298,6 +298,8 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		if( empty( $current_user ) ) {
 			return false;
 		}
+		
+		$emails = apply_filters( 'bbp_notify_admin_email_addresses', $emails, $context );
 				
 		//the default to email address is  admin_email 's	
 		//$to_email = get_option( 'admin_email' );

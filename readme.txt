@@ -3,7 +3,7 @@ Contributors: buddydev,sbrajesh
 Tags: bbpress, forum-notifications, admin notifications, notifications
 Requires at least: bbPress 2.4
 Tested up to: bbPress 2.5.8
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ There is not settings. Just activate and that's all.
 
 
 == Changelog ==
+
+= 1.0.2 =
+* Fix type, notify method expects 'headers' not 'header'. Now, will allow sending mails to multiple users using the previous filter.
 
 = 1.0.1 =
 * Added filter to allow including extra emails to be notified

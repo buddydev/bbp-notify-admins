@@ -105,7 +105,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		// Loop through users
 		foreach ( $emails as $email ) {
 			//add all other users as bcc(only applies in case we have more than 1 admin )
-			$headers[] = 'Bcc: ' . $email;
+			$headers[] = 'Bcc:' . $email;
 		}
 
 		//send email
@@ -114,7 +114,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 			'subject'		=> $subject,
 			'message'		=> $message,
 			'to'			=> $to_email,
-			'header'		=> $headers
+			'headers'		=> $headers
 		) );
 	}
 	/**
@@ -202,7 +202,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		// Loop through users
 		foreach ( $emails as $email ) {
 			//add all other users as bcc(only applies in case we have more than 1 admin )
-			$headers[] = 'Bcc: ' . $email;
+			$headers[] = 'Bcc:' . $email;
 		}
 
 		
@@ -211,7 +211,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 			'subject'		=> $subject,
 			'message'		=> $message,
 			'to'			=> $to_email,
-			'header'		=> $headers
+			'headers'		=> $headers
 		) );
 		
 	}

@@ -1,56 +1,49 @@
 <?php
+// No Direct access.
+defined( 'ABSPATH' ) || exit(0);
 
 /**
  * Notifies Admins by email
- * 
  */
 class BBP_Notify_Admin_Email_Notifier {
 	
 	private static $instance;
-	
-	private function __construct() {
-		
-	}
 
 	/**
-	 * 
+	 * Get the singleton.
+	 *
 	 * @return BBP_Notify_Admin_Email_Notifier
 	 */
 	public static function get_instance() {
-		
-		if( ! isset( self:: $instance ) ) {
+
+		if ( ! isset( self:: $instance ) ) {
 			self::$instance = new self();
 		}
-		
+
 		return self::$instance;
-		
 	}
-	
-	
+
 	/**
 	 * Notify admins on new topic
 	 * 
-	 * @param type $topic_id
-	 * @param type $forum_id
-	 * @param type $anonymous_data
-	 * @param type $topic_author
-	 * @return boolean
+	 * @param int   $topic_id topic id.
+	 * @param int   $forum_id forum id.
+	 * @param array $anonymous_data anonymous user data.
+	 * @param int   $topic_author topic author user id.
 	 */
 	public function notify_topic( $topic_id, $forum_id, $anonymous_data, $topic_author ) {
-		
+
 		$topic_id = bbp_get_topic_id( $topic_id );
 		$forum_id = bbp_get_forum_id( $forum_id );
-		
+
 		remove_all_filters( 'bbp_get_topic_content' );
-		remove_all_filters( 'bbp_get_topic_title'   );
-		
+		remove_all_filters( 'bbp_get_topic_title' );
+
 		$topic_title   = strip_tags( bbp_get_topic_title( $topic_id ) );
 		$topic_content = strip_tags( bbp_get_topic_content( $topic_id ) );
 		$topic_url     = bbp_get_topic_permalink( $topic_id );
-		
-		$topic_author_name = bbp_get_topic_author_display_name( $topic_id );
 
-		
+		$topic_author_name = bbp_get_topic_author_display_name( $topic_id );
 		
 		$message = sprintf( __( '%1$s created new topic:
 
@@ -60,7 +53,7 @@ Topic Link: %3$s
 
 -----------
 
-You are receiving this email because you askd for it.
+You are receiving this email because you asked for it.
 
 Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 
@@ -74,61 +67,59 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		if ( empty( $message ) ) {
 			return;
 		}
-		
-		
+
 		$subject = apply_filters( 'bbp_notify_admin_reply_mail_title', $this->get_subject( __( 'New Topic: ', 'bbp-notify-admin' ) . $topic_title ), $topic_id, $forum_id );
 		if ( empty( $subject ) ) {
 			return;
 		}
-		
+
 		$headers = $this->get_headers();
-		
+
 		//get the users to send an email
 		$users = $this->get_users_to_notify( 'topic' );
 
-		
 		$users = apply_filters( 'bbp_notify_admin_topic_notifiable_users', $users );
-		
-		
+
 		if ( empty( $users ) ) {
-			return false;
+			return;
 		}
 		//get all users emails
 		$emails = $this->get_emails( $users, 'topic' );
-		
-		if( empty( $emails ) ) {
-			return false;//no one to send to
-		}
-		
-		$to_email = array_shift( $emails );
-		
-		// Loop through users
-		foreach ( $emails as $email ) {
-			//add all other users as bcc(only applies in case we have more than 1 admin )
-			$headers[] = 'Bcc:' . $email;
+
+		if ( empty( $emails ) ) {
+			return;// no one to send to.
 		}
 
-		//send email
-		//even if an admin posts, It will notify everyone including him
+		$to_email = array_shift( $emails );
+
+		// Loop through users.
+		foreach ( $emails as $email ) {
+			// add all other users as bcc(only applies in case we have more than 1 admin ).
+			$headers[] = 'Bcc: ' . $email;
+		}
+
+		// send email.
+		// even if an admin posts, It will notify everyone including them.
 		$this->notify( array(
-			'subject'		=> $subject,
-			'message'		=> $message,
-			'to'			=> $to_email,
-			'headers'		=> $headers
+			'subject' => $subject,
+			'message' => $message,
+			'to'      => $to_email,
+			'headers' => $headers
 		) );
 	}
+
 	/**
 	 * Notify admins on new reply on the forum
 	 * 
 	 * A modified/inspired version of  bbp_notify_topic_subscribers()
-	 * @param type $reply_id
-	 * @param type $topic_id
-	 * @param type $forum_id
-	 * @param type $anonymous_data
-	 * @param type $reply_author
-	 * @param type $unknown_boolean
-	 * @param type $reply_to
-	 * @return boolean
+	 *
+	 * @param int   $reply_id reply id.
+	 * @param int   $topic_id topic id.
+	 * @param int   $forum_id forum id.
+	 * @param array $anonymous_data
+	 * @param int   $reply_author reply poster.
+	 * @param bool  $unknown_boolean unknown.
+	 * @param int   $reply_to post id which we are replying.
 	 */
 	public function notify_reply( $reply_id, $topic_id, $forum_id, $anonymous_data, $reply_author, $unknown_boolean , $reply_to ) {
 		
@@ -138,8 +129,6 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		
 		// Poster name
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
-		
-		
 
 		remove_all_filters( 'bbp_get_reply_content' );
 		remove_all_filters( 'bbp_get_topic_title'   );
@@ -172,7 +161,6 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 			return;
 		}
 		
-		
 		$subject = apply_filters( 'bbp_notify_admin_reply_mail_title', $this->get_subject( __( 'New Reply: ', 'bbp-notify-admin' ) . $topic_title ), $reply_id, $topic_id );
 		
 		if ( empty( $subject ) ) {
@@ -181,20 +169,20 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		
 		$headers = $this->get_headers();
 		
-		//get all admin users
+		// get all admin users
 		$users = $this->get_users_to_notify( 'reply' );
 
 		$users = apply_filters( 'bbp_notify_admin_reply_notifiable_users', $users );
-	
+
 		if ( empty( $users ) ) {
-			return false;
+			return;
 		}
-		
+
 		//get all users emails
 		$emails = $this->get_emails( $users, 'reply' );
-		
-		if( empty( $emails ) ) {
-			return false;//no one to send to
+
+		if ( empty( $emails ) ) {
+			return;//no one to send to
 		}
 		
 		$to_email = array_shift( $emails );
@@ -205,56 +193,52 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 			$headers[] = 'Bcc:' . $email;
 		}
 
-		
-
 		$this->notify( array(
 			'subject'		=> $subject,
 			'message'		=> $message,
 			'to'			=> $to_email,
 			'headers'		=> $headers
 		) );
-		
 	}
 	
 	/**
 	 * Send email
 	 * 
-	 * @param type $args
-	 * @return type
+	 * @param array $args args.
 	 */
 	private function notify( $args = null ) {
-		
+
 		$defaults = array(
-			'subject'	=> '',
-			'message'	=> '',
-			'to'		=> '',
-			'headers'	=> '',
+			'subject' => '',
+			'message' => '',
+			'to'      => '',
+			'headers' => '',
 		);
-		
+
 		$args = wp_parse_args( $args, $defaults );
-		
+
 		extract( $args );
-		
-		if( ! $to || ! $subject || !$message  ) {
-			return ;
+
+		if ( ! $args['to'] || ! $args['subject'] || ! $args['message'] ) {
+			return;
 		}
-		
-		
-		wp_mail( $to, $subject, $message, $headers );
-		
+
+		wp_mail( $args['to'], $args['subject'], $args['message'], $args['headers'] );
 	}
-	/*
+
+	/**
 	 * Get basic header(from etc)
+	 *
+	 * @return array
 	 */
 	private function get_headers() {
 		
-		// Get the noreply@sitename.com email address
+		// Get the noreply@sitename.com email address.
 		$no_reply   = bbp_get_do_not_reply_address();
 
-		
 		$from_email = apply_filters( 'bbp_notify_admin_from_email', $no_reply );
 
-		// Setup the From header
+		// Setup the From header.
 		$headers = array( 'From: ' . get_bloginfo( 'name' ) . ' <' . $from_email . '>' );
 		
 		return $headers;
@@ -263,56 +247,65 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 	/**
 	 * Get subject of the message
 	 * 
-	 * @param type $subject
-	 * @return type
+	 * @param string $subject subject.
+	 *
+	 * @return string
 	 */
 	private function get_subject( $subject ) {
 		$blog_name     = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
 		
 		return '[' . $blog_name . '] ' . $subject;
-		
 	}
+
 	/**
 	 * Get the users whom we plan to notify
 	 * 
-	 * @param type $type
-	 * @return type
+	 * @param string $type context.
+	 *
+	 * @return array
 	 */
 	private function get_users_to_notify( $type = 'topic' ) {
 		
 		//get user by rle
 		
 		$users = get_users( array(
-			'role'	=> 'administrator'
+			'role__in'	=> array( 'administrator', 'bbp_keymaster' )
 		) );
 		
 		return $users;
 	}
-	
+
+	/**
+	 * Get the email addresses list.
+	 *
+	 * @param array  $users users list.
+	 * @param string $context context.
+	 *
+	 * @return array
+	 */
 	private function get_emails( $users, $context = null ) {
-		
+
 		$emails = wp_list_pluck( $users, 'user_email' );
-		//get current user's email
+		// get current user's email.
 		$current_user = wp_get_current_user();
-		
-		if( empty( $current_user ) ) {
-			return false;
+
+		if ( empty( $current_user ) ) {
+			return array();
 		}
-		
+
 		$emails = apply_filters( 'bbp_notify_admin_email_addresses', $emails, $context );
-				
-		//the default to email address is  admin_email 's	
-		//$to_email = get_option( 'admin_email' );
-		
+
+		// the default to email address is  admin_email 's
+		// $to_email = get_option( 'admin_email' );
+
 		$current_user_email = $current_user->user_email;
-		
+
 		/*if( $to_email == $current_user_email ) {
 			$to_email = '';//we will get back to it in a moment
 		}*/
-		//when an admin is posting, we exclude him from the list too, 
-		
+		// when an admin is posting, we exclude him from the list too.
 		$emails = array_diff( $emails, (array) $current_user_email );
-		
+
 		return $emails;
 	}
 }

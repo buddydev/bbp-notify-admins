@@ -1,32 +1,47 @@
 <?php
-/*
-Plugin Name: bbPress Notify Admins
-Plugin URI: http://buddydev.com/plugins/bbp-notify-admin/
-Description:  Notify admins on new topic/replies on their bbPress forums
-Version: 1.0.2
-Author: Brajesh Singh(BuddyDev.com)
-Author URI: http://buddydev.com/
-License: GPL
+/**
+ * Plugin Name: bbPress Notify Admins
+ * Plugin URI: https://buddydev.com/plugins/bbp-notify-admin/
+ * Description:  Notify admins on new topic/replies on their bbPress forums
+ * Version: 1.0.2
+ * Author: Brajesh Singh(BuddyDev.com)
+ * Author URI: https://buddydev.com/
+ * License: GPL
 */
 
 class BBP_Notify_Admin_Helper {
-	
+
+	/**
+	 * Singleton instance.
+	 *
+	 * @var BBP_Notify_Admin_Helper
+	 */
 	private static $instance;
-	
+
+	/**
+	 * Plugin directory url.
+	 *
+	 * @var string
+	 */
 	private $url;
+
+	/**
+	 * Plugin directory path.
+	 *
+	 * @var string
+	 */
 	private $path;
-	
-	
+
 	private function __construct() {
 		
 		$this->setup();
 		
 		add_action( 'bbp_loaded', array( $this, 'setup' ) );
-		
 	}
 
 	/**
-	 * 
+	 * Get the singleton instance.
+	 *
 	 * @return BBP_Notify_Admin_Helper
 	 */
 	public static function get_instance() {
@@ -36,7 +51,6 @@ class BBP_Notify_Admin_Helper {
 		}
 		
 		return self::$instance;
-		
 	}
 	
 	/**
@@ -55,10 +69,8 @@ class BBP_Notify_Admin_Helper {
 		
 		add_action( 'bbp_new_topic', array( $notifier, 'notify_topic' ), 50, 5 );
 		add_action( 'bbp_new_reply', array( $notifier, 'notify_reply' ), 50, 7 );
-		
 	}
-	
-	
+
 	/**
 	 * Load required files when bbPress is loaded
 	 * 
@@ -76,7 +88,6 @@ class BBP_Notify_Admin_Helper {
 	 * @return string url
 	 */
 	public function get_url() {
-		
 		return $this->url;
 	}
 	/**
@@ -84,13 +95,8 @@ class BBP_Notify_Admin_Helper {
 	 * @return string
 	 */
 	public function get_path() {
-		
 		return $this->path;
 	}
-	
-	
-	
-
 }
 
 /**
@@ -99,11 +105,8 @@ class BBP_Notify_Admin_Helper {
  * @return BBP_Notify_Admin_Helper
  */
 function bbp_notify_admin_helper() {
-	
 	return BBP_Notify_Admin_Helper::get_instance();
-	
 }
 
-//initialize
+// initialize.
 bbp_notify_admin_helper();
-

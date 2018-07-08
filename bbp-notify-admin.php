@@ -3,7 +3,7 @@
  * Plugin Name: bbPress Notify Admins
  * Plugin URI: https://buddydev.com/plugins/bbp-notify-admin/
  * Description:  Notify admins on new topic/replies on their bbPress forums
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Brajesh Singh(BuddyDev.com)
  * Author URI: https://buddydev.com/
  * License: GPL

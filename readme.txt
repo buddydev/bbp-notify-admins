@@ -1,9 +1,9 @@
 === bbPress Notify Admins ===
 Contributors: buddydev,sbrajesh
 Tags: bbpress, forum-notifications, admin notifications, notifications
-Requires at least: bbPress 2.4
-Tested up to: bbPress 2.5.8
-Stable tag: 1.0.2
+Requires at least: 4.7.0
+Tested up to: 4.9.7
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,9 +13,9 @@ bbPress Notify Admins plugin notifies all site admins when a new topic is create
 bbPress Notify Admin plugin notifies all the admins when a new topic is created or a new reply is posted on bbPress forum. It needs bbPress 2.2 or above.
 We use this plugin internally at BuddyDev to provide timely support.
 
-For more details, please visit [BuddyDev.com]( http://buddydev.com/bbpress/introducing-bbpress-notify-admins-plugin-notify-admins-on-new-topics-or-new-replies )
+For more details, please visit [BuddyDev.com]( https://buddydev.com/bbpress/introducing-bbpress-notify-admins-plugin-notify-admins-on-new-topics-or-new-replies )
 
-For support, please use [BuddyDev Forums]( http://buddydev.com/support/forums/ ).
+For support, please use [BuddyDev Forums]( https://buddydev.com/support/forums/ ).
 
 == Installation ==
 
@@ -33,6 +33,9 @@ There is not settings. Just activate and that's all.
 
 
 == Changelog ==
+= 1.0.3 =
+* Include the keymaster role in the list to be notified.
+* Cleanup code.
 
 = 1.0.2 =
 * Fix type, notify method expects 'headers' not 'header'. Now, will allow sending mails to multiple users using the previous filter.

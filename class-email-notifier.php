@@ -89,17 +89,8 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 
 		$headers = $this->get_headers();
 
-		// Get the users to send an email.
-		$users = $this->get_users_to_notify( 'topic' );
-
-		$users = apply_filters( 'bbp_notify_admin_topic_notifiable_users', $users );
-
-		if ( empty( $users ) ) {
-			return;
-		}
-
 		// Get all users emails.
-		$emails = $this->get_emails( $users, 'topic' );
+		$emails = $this->get_emails( 'topic' );
 
 		if ( empty( $emails ) ) {
 			return;// no one to send to.
@@ -143,12 +134,12 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		$reply_id = bbp_get_reply_id( $reply_id );
 		$topic_id = bbp_get_topic_id( $topic_id );
 		$forum_id = bbp_get_forum_id( $forum_id );
-		
+
 		// Poster name.
 		$reply_author_name = bbp_get_reply_author_display_name( $reply_id );
 
 		remove_all_filters( 'bbp_get_reply_content' );
-		remove_all_filters( 'bbp_get_topic_title'   );
+		remove_all_filters( 'bbp_get_topic_title' );
 		
 		// Strip tags from text and setup mail data.
 		$topic_title   = strip_tags( bbp_get_topic_title( $topic_id ) );
@@ -177,7 +168,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		if ( empty( $message ) ) {
 			return;
 		}
-		
+
 		$subject = apply_filters( 'bbp_notify_admin_reply_mail_title', $this->get_subject( __( 'New Reply: ', 'bbp-notify-admin' ) . $topic_title ), $reply_id, $topic_id );
 
 		if ( empty( $subject ) ) {
@@ -185,25 +176,16 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 		}
 
 		$headers = $this->get_headers();
-		
-		// Get all admin users.
-		$users = $this->get_users_to_notify( 'reply' );
-
-		$users = apply_filters( 'bbp_notify_admin_reply_notifiable_users', $users );
-
-		if ( empty( $users ) ) {
-			return;
-		}
 
 		// Get all users emails.
-		$emails = $this->get_emails( $users, 'reply' );
+		$emails = $this->get_emails( 'reply' );
 
 		if ( empty( $emails ) ) {
 			return; // No one to send to.
 		}
-		
+
 		$to_email = array_shift( $emails );
-		
+
 		// Loop through users.
 		foreach ( $emails as $email ) {
 			// Add all other users as bcc(only applies in case we have more than 1 admin ).
@@ -222,7 +204,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 	
 	/**
 	 * Send email
-	 * 
+	 *
 	 * @param array $args args.
 	 */
 	private function notify( $args = null ) {
@@ -253,7 +235,7 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 	private function get_headers() {
 		
 		// Get the noreply@sitename.com email address.
-		$no_reply   = bbp_get_do_not_reply_address();
+		$no_reply = bbp_get_do_not_reply_address();
 
 		$from_email = apply_filters( 'bbp_notify_admin_from_email', $no_reply );
 
@@ -277,46 +259,32 @@ Login and visit the settings to disable these emails.', 'bbp-notify-admin' ),
 	}
 
 	/**
-	 * Get the users whom we plan to notify
-	 *
-	 * @param string $type context.
-	 *
-	 * @return array
-	 */
-	private function get_users_to_notify( $type = 'topic' ) {
-		// Get user by role.
-		$users = get_users( array( 'role__in' => array( 'administrator', 'bbp_keymaster' ) ) );
-
-		return $users;
-	}
-
-	/**
 	 * Get the email addresses list.
 	 *
-	 * @param array  $users users list.
 	 * @param string $context context.
 	 *
 	 * @return array
 	 */
-	private function get_emails( $users, $context = null ) {
-		$emails = wp_list_pluck( $users, 'user_email' );
-		// Get current user's email.
-		$current_user = wp_get_current_user();
+	private function get_emails( $context = null ) {
+		$emails = get_option( 'bbp_notify_admins_settings' );
+		$emails = isset( $emails['bbp_notify_admins_emails'] ) ? $emails['bbp_notify_admins_emails'] : '';
 
-		if ( empty( $current_user ) ) {
+		$emails = explode( ',', $emails );
+
+		if ( empty( $emails ) ) {
 			return array();
 		}
 
+		$emails = array_map( 'trim', $emails );
 		$emails = apply_filters( 'bbp_notify_admin_email_addresses', $emails, $context );
 
-		// the default to email address is  admin_email 's
-		// $to_email = get_option( 'admin_email' );.
+		$current_user       = wp_get_current_user();
+		$current_user_email = '';
 
-		$current_user_email = $current_user->user_email;
+		if ( ! empty( $current_user ) ) {
+			$current_user_email = $current_user->user_email;
+		}
 
-		/*if( $to_email == $current_user_email ) {
-			$to_email = '';//we will get back to it in a moment
-		}*/
 		// when an admin is posting, we exclude him from the list too.
 		$emails = array_diff( $emails, (array) $current_user_email );
 

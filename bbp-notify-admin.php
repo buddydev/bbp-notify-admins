@@ -47,8 +47,9 @@ class BBP_Notify_Admin_Helper {
 	 */
 	private function __construct() {
 		$this->setup();
-		
+
 		add_action( 'bbp_loaded', array( $this, 'setup' ) );
+		add_action( 'plugins_loaded', array( $this, 'load_admin' ), 9996 ); // pt-settings 1.0.3.
 	}
 
 	/**
@@ -78,6 +79,21 @@ class BBP_Notify_Admin_Helper {
 
 		add_action( 'bbp_new_topic', array( $notifier, 'notify_topic' ), 50, 5 );
 		add_action( 'bbp_new_reply', array( $notifier, 'notify_reply' ), 50, 7 );
+	}
+
+	/**
+	 * Load admin files and initialize settings helper class.
+	 */
+	public function load_admin() {
+
+		if ( ! function_exists( 'bbpress' ) || ! is_admin() || wp_doing_ajax() ) {
+			return;
+		}
+
+		require_once $this->path . 'admin/pt-settings/pt-settings-loader.php';
+		require_once $this->path . 'admin/class-bbp-notify-admin-settings-helper.php';
+
+		BBP_Notify_Admin_Settings_Helper::boot();
 	}
 
 	/**
